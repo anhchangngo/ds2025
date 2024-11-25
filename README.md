@@ -9,6 +9,6 @@ Students are expected to:
 Student Info
 =========================
 
-* Student Name: USTH ICT1
-* Student ID: Not-Vietnamese
-* Student Group ID: Not-for-now
+* Student Name: Đỗ Trọng Đạt
+* Student ID: 22BI13075
+* Student Group ID: 1
