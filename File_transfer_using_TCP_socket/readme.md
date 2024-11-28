@@ -1,3 +1,33 @@
+# File_transfer_using_TCP_socket
+
+The client.c file contains the code for the client-side, which read the text file and sends it to the server and the server.c file receives the data from the client and saves it in a text file
+
+- Server
+
+```
+dat@ubuntu:/ds2025/File_transfer_using_TCP_socket$ gcc server.c -o server
+dat@ubuntu:/ds2025/File_transfer_using_TCP_socket$ ./server
+[+] Socket of server connected
+[+] bind successfully
+[+] Listening for connections...
+```
+
+- Client
+
+```
+dat@ubuntu:/ds2025/File_transfer_using_TCP_socket$ gcc client.c -o client
+dat@ubuntu:/ds2025/File_transfer_using_TCP_socket$ ./client
+[+] Socket of server connected
+[+] connect to server successfully
+[+] Data sent successfully to server
+```
+
+- Now in Server
+
+```
+[+] Data received and written to 'test2.txt' successfully
+```
+
 ### open_clientfd.c
 
 Reference : https://www.cse.psu.edu/~deh25/cmpsc311/Lectures/Sockets/open_clientfd.c
@@ -83,9 +113,3 @@ int open_listenfd(int port)
 
 Explain
 ```
-
-Reference
-
-https://www.webpadi.com/instantly-boost-your-network-skills/
-
-https://github.com/MuskanVerma2062/Chat-Server?tab=readme-ov-file
