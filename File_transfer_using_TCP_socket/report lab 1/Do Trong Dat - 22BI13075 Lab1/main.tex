@@ -4,14 +4,14 @@
 
 \begin{document}
 
-\title{TCP File Transfer Protocol}
+\title{Practical Work 1: TCP File transfer}
 \author{Do Trong Dat - 22BI13075}
 \date{\today}
 
 \maketitle
 
 \begin{abstract}
-A simple file transfer protocol implemented using TCP/IP sockets in C++. The server listens for incoming connections on a specified port and receives a file from the client. The client connects to the server and sends the file contents.
+A simple file transfer protocol implemented using TCP/IP sockets in C. The server listens for incoming connections on a specified port and receives a file from the client. The client connects to the server and sends the file contents.
 \end{abstract}
 
 \section{Protocol Design}
@@ -23,14 +23,15 @@ The protocol follows a basic request-response pattern:
 The client follows the steps outlined below:
 
 \begin{enumerate}
-    \item Perform DNS resolution for the hostname through \texttt{gethostbyname()}.
-    \item Handle errors in operations such as creating sockets, connecting, sending, and receiving data.
+    \item Resolves the hostname using \texttt{gethostbyname()}.
+    \item Handles errors during operations like socket creation, connection, data sending, and receiving.
     \item Create a socket using \texttt{socket()} and connect to the server using \texttt{connect()}.
     \item Open and read a file in chunks using \texttt{fread()}.
     \item Send data in chunks using \texttt{send()}.
     \item Close file and socket after communication is complete.
 \end{enumerate}
 
+\includegraphics[width=1\linewidth]{client}
 
 \subsection{Server}
 
@@ -44,12 +45,96 @@ The server follows these steps:
     \item Closes all resources after the transfer is complete.
 \end{enumerate}
 
-
-\includegraphics[width=1\linewidth]{image1.png}
+\includegraphics[width=1\linewidth]{server}
 
 \section{System Organization}
 
 The system consists of two main components:
+
+\subsection{Client}
+
+The client connects to the server, sends the filename, and transmits the file data in chunks.
+\begin{lstlisting}[language=C, caption=Client C Code, label=lst:code]
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <netdb.h> // For gethostbyname()
+
+#define PORT 8080
+#define SIZE 1024
+
+int open_clientfd(char *hostname, int port) {
+    int clientfd;
+    struct hostent *hp;
+    struct sockaddr_in serveraddr;
+
+    if ((clientfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        perror("[-] Socket creation failed");
+        return -1;
+    }
+
+    if ((hp = gethostbyname(hostname)) == NULL) {
+        perror("[-] DNS resolution failed");
+        return -1;
+    }
+
+    bzero((char *)&serveraddr, sizeof(serveraddr));
+    serveraddr.sin_family = AF_INET;
+    bcopy((char *)hp->h_addr_list[0], (char *)
+    &serveraddr.sin_addr.s_addr, hp->h_length);
+    serveraddr.sin_port = htons(port);
+
+    if (connect(clientfd, (struct sockaddr *)&serveraddr, 
+    sizeof(serveraddr)) < 0) {
+        perror("[-] Connection failed");
+        return -1;
+    }
+
+    return clientfd;
+}
+
+int main() {
+    char *hostname = "127.0.0.1"; // Replace with domain name if needed
+    char buffer[SIZE];
+    FILE *file;
+    int clientfd;
+
+    clientfd = open_clientfd(hostname, PORT);
+    if (clientfd < 0) {
+        return 1; // Exit if connection fails
+    }
+    printf("[+] Connected to server successfully\n");
+
+    file = fopen("test.txt", "r");
+    if (file == NULL) {
+        perror("[-] Error opening file");
+        close(clientfd);
+        return 1;
+    }
+
+    ssize_t bytes_read, bytes_sent;
+    while ((bytes_read = fread(buffer, 1, SIZE, file)) > 0) {
+        bytes_sent = send(clientfd, buffer, bytes_read, 0); // Using send()
+        if (bytes_sent < 0) {
+            perror("[-] Error sending data");
+            fclose(file);
+            close(clientfd);
+            return 1;
+        }
+    }
+
+    printf("[+] File sent successfully\n");
+
+    fclose(file);
+    close(clientfd);
+    return 0;
+}
+
+\end{lstlisting}
 
 \subsection{Server}
 
@@ -157,90 +242,6 @@ int main() {
 }
 \end{lstlisting}
 
-\subsection{Client}
-
-The client connects to the server, sends the filename, and transmits the file data in chunks.
-\begin{lstlisting}[language=C, caption=Client C Code, label=lst:code]
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <netdb.h> // For gethostbyname()
-
-#define PORT 8080
-#define SIZE 1024
-
-int open_clientfd(char *hostname, int port) {
-    int clientfd;
-    struct hostent *hp;
-    struct sockaddr_in serveraddr;
-
-    if ((clientfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        perror("[-] Socket creation failed");
-        return -1;
-    }
-
-    if ((hp = gethostbyname(hostname)) == NULL) {
-        perror("[-] DNS resolution failed");
-        return -1;
-    }
-
-    bzero((char *)&serveraddr, sizeof(serveraddr));
-    serveraddr.sin_family = AF_INET;
-    bcopy((char *)hp->h_addr_list[0], (char *)
-    &serveraddr.sin_addr.s_addr, hp->h_length);
-    serveraddr.sin_port = htons(port);
-
-    if (connect(clientfd, (struct sockaddr *)&serveraddr, 
-    sizeof(serveraddr)) < 0) {
-        perror("[-] Connection failed");
-        return -1;
-    }
-
-    return clientfd;
-}
-
-int main() {
-    char *hostname = "127.0.0.1"; // Replace with domain name if needed
-    char buffer[SIZE];
-    FILE *file;
-    int clientfd;
-
-    clientfd = open_clientfd(hostname, PORT);
-    if (clientfd < 0) {
-        return 1; // Exit if connection fails
-    }
-    printf("[+] Connected to server successfully\n");
-
-    file = fopen("test.txt", "r");
-    if (file == NULL) {
-        perror("[-] Error opening file");
-        close(clientfd);
-        return 1;
-    }
-
-    ssize_t bytes_read, bytes_sent;
-    while ((bytes_read = fread(buffer, 1, SIZE, file)) > 0) {
-        bytes_sent = send(clientfd, buffer, bytes_read, 0); // Using send()
-        if (bytes_sent < 0) {
-            perror("[-] Error sending data");
-            fclose(file);
-            close(clientfd);
-            return 1;
-        }
-    }
-
-    printf("[+] File sent successfully\n");
-
-    fclose(file);
-    close(clientfd);
-    return 0;
-}
-
-\end{lstlisting}
 \begin{figure}
     \centering
     \includegraphics[width=1\linewidth]{Socket_server-1-modified.png}
@@ -254,5 +255,8 @@ int main() {
     \caption{System Architecture for TCP File Transfer}
     \label{fig:enter-label}
 \end{figure}
+
+\section{Conclusion}
+This labwork provided valuable hands-on experience with TCP/IP and socket programming, enabling us to implement and test a file transfer system in a client-server architecture. Challenges such as EOF management and connection errors were effectively handled through robust exception handling and edge-case testing. This experience highlighted the importance of secure and scalable communication systems, motivating future enhancements such as encryption for secure data transfers and multi-client support for increased usability. These insights have direct applications in developing file-sharing platforms and remote backup systems.
 
 \end{document}
