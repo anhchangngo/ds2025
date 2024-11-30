@@ -9,6 +9,6 @@ Students are expected to:
 Student Info
 =========================
 
-* Student Name: Đỗ Trọng Đạt
+* Student Name: Do Trong Dat
 * Student ID: 22BI13075
-* Student Group ID: 1
+* Student Group ID: 09
