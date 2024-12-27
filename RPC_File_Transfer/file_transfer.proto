@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+service FileTransfer {
+    rpc UploadFile (stream FileChunk) returns (TransferStatus);
+}
+
+// stream FileChunk : client will send multiple packets (chunks) consecutively instead of a single large packet.
+
+message FileChunk {
+    string filename = 1; // Tên file đang được truyền
+    bytes data = 2;     // Dữ liệu nhị phân của file
+}
+
+// message : data structure that the client and server exchange.
+
+message TransferStatus {
+    string message = 1;     // Upload status notification (e.g., "Success" or "Error")
+}
