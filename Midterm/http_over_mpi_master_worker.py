@@ -6,24 +6,24 @@ comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 
 # -------------------------------
-# Xử lý tại Master (Rank 0)
+# Handling at Master (Rank 0)
 # -------------------------------
 class ProxyHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if rank == 0:
-            # Gói yêu cầu HTTP
+            # Pack the HTTP request
             request_data = {
                 "method": "GET",
                 "path": self.path,
                 "headers": dict(self.headers)
             }
-            # Gửi yêu cầu tới Worker (rank 1)
+            # Send the request to Worker (rank 1)
             comm.send(request_data, dest=1, tag=0)
             
-            # Nhận phản hồi từ Worker
+            # Receive the response from Worker
             response_data = comm.recv(source=1, tag=1)
             
-            # Gửi phản hồi về client
+            # Send the response back to the client
             self.send_response(response_data['status'])
             for key, value in response_data['headers'].items():
                 self.send_header(key, value)
@@ -31,26 +31,26 @@ class ProxyHandler(BaseHTTPRequestHandler):
             self.wfile.write(response_data['body'])
 
 def run_master():
-    server_address = ('', 8080)  # Lắng nghe cổng 8080
+    server_address = ('', 8080)  # Listen on port 8080
     httpd = HTTPServer(server_address, ProxyHandler)
-    print("Master proxy đang chạy trên cổng 8080...")
+    print("Master proxy is running on port 8080...")
     httpd.serve_forever()
 
 # -------------------------------
-# Xử lý tại Worker (Rank > 0)
+# Handling at Worker (Rank > 0)
 # -------------------------------
 def run_worker():
     while True:
-        # Nhận yêu cầu từ Master
+        # Receive the request from Master
         request_data = comm.recv(source=0, tag=0)
         
-        # Chuyển tiếp yêu cầu tới server mục tiêu
+        # Forward the request to the target server
         target_url = "http://localhost:5000" + request_data["path"]
         print(f"Worker forwarding request to: {target_url}")
         
         try:
             response = requests.get(target_url, headers=request_data["headers"])
-            # Gói phản hồi
+            # Pack the response
             response_data = {
                 "status": response.status_code,
                 "headers": dict(response.headers),
@@ -64,11 +64,11 @@ def run_worker():
                 "body": b"Internal Server Error"
             }
 
-        # Gửi phản hồi lại cho Master
+        # Send the response back to Master
         comm.send(response_data, dest=0, tag=1)
 
 # -------------------------------
-# Chạy chương trình
+# Run the program
 # -------------------------------
 if rank == 0:
     run_master()
