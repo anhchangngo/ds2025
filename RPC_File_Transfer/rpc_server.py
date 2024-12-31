@@ -10,7 +10,7 @@ class FileTransferService(file_transfer_pb2_grpc.FileTransferServicer):
         # context: authentication, connection check, timeout handling will do in future 
         try:
             first_chunk = next(request_iterator) # Get the first chunk
-            filepath = os.path.join("./uploaded_files", os.path.basename(first_chunk.filename))  # Create the file path
+            filepath = os.path.join("./uploaded_files", os.path.basename(first_chunk.filename))  # Create the file path and os.path.basename only the file name without needing to know the original file path on the client.
             os.makedirs(os.path.dirname(filepath), exist_ok=True)  # Create the directory
 
             with open(filepath, "wb") as file:

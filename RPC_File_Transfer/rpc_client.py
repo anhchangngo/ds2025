@@ -17,7 +17,7 @@ def upload_file(filename):
             return
     # Call the RPC method UploadFile on the server.
     response = stub.UploadFile(generate_chunks())
-    print(response.message)
+    print(response.message)   # display the response from the server after making the RPC call
 
 if __name__ == "__main__":
     upload_file("test.txt")

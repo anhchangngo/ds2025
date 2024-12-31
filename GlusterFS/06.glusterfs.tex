@@ -1,0 +1,59 @@
+1. Install GlusterFS on your laptops
+
+On a
+-----------------------------------------
+sudo apt update
+sudo apt install glusterfs-server
+-----------------------------------------
+
+On a RedHat/Cent
+-----------------------------------------
+sudo yum install glusterfs-server
+-----------------------------------------
+
+Start the GlusterFS service:
+-----------------------------------------
+sudo systemctl start glusterd
+sudo systemctl enable glusterd
+-----------------------------------------
+
+2. Make a Trusted Pool
+
+Use the gluster peer probe command to add peers (nodes):
+-----------------------------------------
+gluster peer probe <other-node-ip>
+-----------------------------------------
+
+Check the pool status:
+-----------------------------------------
+gluster peer status
+-----------------------------------------
+
+3. Create a Distributed Replicated Volume
+
+Assuming you have three nodes (node1, node2, and node3) with storage paths /data/glusterfs:
+-----------------------------------------
+gluster volume create my_volume replica 3 \
+node1:/data/glusterfs \
+node2:/data/glusterfs \
+node3:/data/glusterfs
+-----------------------------------------
+
+Start the volume:
+-----------------------------------------
+gluster volume start my_volume
+-----------------------------------------
+
+4. Perform Benchmarks
+
+For small files (e.g., measure number of accesses/s):
+-----------------------------------------
+fio --name=smallfile --size=4k --filesize=10M --numjobs=8 --rw=randread --bs=4k --iodepth=8 --directory=/mnt/glusterfs
+-----------------------------------------
+
+For large files (e.g., measure read speed in MB/s):
+-----------------------------------------
+dd if=/dev/zero of=/mnt/glusterfs/testfile bs=1G count=1 oflag=direct
+-----------------------------------------
+
+Replace /mnt/glusterfs with the mount point for your GlusterFS volume.

@@ -15,10 +15,11 @@ def master_process(filename):
                 chunks.append(chunk)
         
         num_chunks = len(chunks)
+        print(f"Chunk size: {len(chunk)} bytes")
         print(f"Master: Read {num_chunks} chunks from '{filename}'.")
 
         # Distribute chunks to workers
-        for i, chunk in enumerate(chunks):
+        for i, chunk in enumerate(chunks):  # i is the chunk index
             dest_rank = i % (size - 1) + 1  # Distribute among workers
             comm.send((i, chunk), dest=dest_rank, tag=11)  # tag 11 : mark the message as chunk data.
             print(f"Master: Sent chunk {i} to process {dest_rank}.")
@@ -50,7 +51,7 @@ def worker_process(output_dir="./uploaded_files"):
     os.makedirs(output_dir, exist_ok=True)
     try:
         while True:
-            data = comm.recv(source=0, tag=11)
+            data = comm.recv(source=0, tag=11)  # source=0: receive from master
             if data is None:  # Termination signal
                 print(f"Worker {rank}: Received termination signal.")
                 break
