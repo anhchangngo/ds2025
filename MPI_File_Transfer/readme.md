@@ -1,5 +1,5 @@
 ## MPI
-MPI operates on a peer-to-peer model, where processes operate independently and communicate with each other through a message passing mechanism.
+MPI (Message Passing Interface) operates on a peer-to-peer model, where processes operate independently and communicate with each other through a message passing mechanism.
 
 | **Feature**          | **Client-Server**                                    | **MPI**                                                |
 |-----------------------|-----------------------------------------------------|-------------------------------------------------------|

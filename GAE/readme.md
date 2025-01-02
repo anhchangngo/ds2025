@@ -46,3 +46,19 @@ Connect the customer needs with the provider's services
     - Resource sharing
     - Only pay for initial investment
 
+# Virtualization
+- Software and/or hardware-based solution
+- Building and running many operating systems simultaneously
+- Separate physical hardware and the executing operating systems
+- eg: VMware Workstation, VirtualBox, ...
+
+## Hypervisor
+- Virtual Machine Monitor
+- Responsible for hardware emulation and communication
+    - CPU
+    - Memory
+    - Storage
+    - Network
+    - ...
+- Share its hardware resources to Guest OS
+
